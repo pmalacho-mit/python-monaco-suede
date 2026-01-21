@@ -1,0 +1,12 @@
+; DO NOT EDIT (unless you know what you are doing)
+;
+; This subdirectory is a git "subrepo", and this file is maintained by the
+; git-subrepo command. See https://github.com/ingydotnet/git-subrepo#readme
+;
+[subrepo]
+	remote = https://github.com/pmalacho-mit/python-monaco-suede
+	branch = release
+	commit = 302eb608229a48d7d4ff9987ca394d3de8c97239
+	parent = cd53eacb87f4434b54b9bddc6c285a0bb40400c7
+	method = merge
+	cmdver = 0.4.9
