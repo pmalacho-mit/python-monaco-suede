@@ -1,6 +1,6 @@
 # Python-monaco-suede
 
-This repo is a [suede dependency](https://github.com/pmalacho-mit/suede). 
+This repo is a [suede dependency](https://github.com/pmalacho-mit/suede).
 
 To see the installable source code, please checkout the [release branch](https://github.com/pmalacho-mit/python-monaco-suede/tree/release).
 
@@ -20,4 +20,3 @@ bash <(curl https://raw.githubusercontent.com/pmalacho-mit/suede/refs/heads/main
 ```
 
 </details>
-
