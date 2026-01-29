@@ -56,7 +56,6 @@
       else break;
     }
     return diagnostics.filter((diagnostic) => {
-      if (!diagnostic.code || !diagnostic.code.value) return true;
       if (diagnostic.code.value !== "reportUnusedExpression") return true;
       return diagnostic.range.start.line + 1 !== lineCount;
     });
