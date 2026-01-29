@@ -82,8 +82,7 @@
           documentSelector: ["python"],
           middleware: {
             handleDiagnostics: (uri, diagnostics, next) => {
-              const model = monaco.editor.getModel(uri);
-              if (!model) return next(uri, diagnostics);
+              const model = monaco.editor.getModel(uri)!;
               const lines = model.getLinesContent();
               diagnostics = filterUnusedClosingStatement(
                 uri,
@@ -135,8 +134,8 @@
 
     async register({
       path,
-      source: text,
-    }: Pick<EditableFile, "path" | "source">) {
+      content: text,
+    }: Pick<EditableFile, "path" | "content">) {
       const registered = this.map.get(path);
       if (registered) {
         registered.text = text;
@@ -188,7 +187,7 @@
 
   const attachEditor = async (
     target: HTMLElement,
-    file: Pick<EditableFile, "path" | "source" | "sourceSync">,
+    file: Pick<EditableFile, "path" | "content">,
     onEditor?: OnEditor,
   ) => {
     const wrapper = new MonacoEditorLanguageClientWrapper();
@@ -215,10 +214,9 @@
 
     if (!model) throw new Error("Model not found");
 
-    const onChangeContentDisposable = model.onDidChangeContent(() => {
-      if (file.sourceSync) return;
-      file.source = model.getValue();
-    });
+    const onChangeContentDisposable = model.onDidChangeContent(
+      () => (file.content = model.getValue()),
+    );
 
     const dispose = () => {
       onEditorDisposable?.dispose();
@@ -246,16 +244,9 @@
   $effect(() => {
     if (!container) return;
     const { path: _ } = file;
-    const child = document.createElement("div");
-    child.style.width = "100%";
-    child.style.height = "100%";
-    container.appendChild(child);
-    const handle = untrack(() => attachEditor(child, file, onEditor));
+    const handle = untrack(() => attachEditor(container!, file, onEditor));
     current = handle;
-    return () => {
-      handle.then(({ dispose }) => dispose());
-      container?.removeChild(child);
-    };
+    return () => handle.then(({ dispose }) => dispose());
   });
 
   $effect(() => {
@@ -270,17 +261,15 @@
   });
 
   $effect(() => {
-    const { sourceSync } = file;
-    if (!sourceSync) return;
+    const { sync } = file;
+    if (!sync) return;
     let dispose: (() => void) | null = null;
     current?.then(({ model, editor }) => {
-      const binding = new MonacoBinding(sourceSync, model, new Set([editor]));
+      const binding = new MonacoBinding(sync, model, new Set([editor]));
       dispose = () => binding.destroy();
     });
     return () => dispose?.();
   });
-
-  $inspect(file.path);
 </script>
 
 <div style:width="100%" style:height="100%" bind:this={container}></div>
