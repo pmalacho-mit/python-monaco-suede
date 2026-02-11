@@ -55,6 +55,7 @@
       if (lines[i].trim() === "") lineCount--;
       else break;
     }
+    console.log(diagnostics);
     return diagnostics.filter((diagnostic) => {
       if (!diagnostic.code || !diagnostic.code.value) return true;
       if (diagnostic.code.value === "reportUnusedExpression")
