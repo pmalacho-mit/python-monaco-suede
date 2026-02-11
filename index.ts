@@ -15,5 +15,4 @@ export const Editor = {
 
 export namespace Editor {
   export type Model = EditableFile;
-  export type Component = EditorComponent;
 }

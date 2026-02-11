@@ -55,13 +55,10 @@
       if (lines[i].trim() === "") lineCount--;
       else break;
     }
-    console.log(diagnostics);
     return diagnostics.filter((diagnostic) => {
       if (!diagnostic.code || !diagnostic.code.value) return true;
-      if (diagnostic.code.value === "reportUnusedExpression")
-        return diagnostic.range.start.line + 1 !== lineCount;
-      if (diagnostic.code.value === "reportUndefinedVariable") return false;
-      return true;
+      if (diagnostic.code.value !== "reportUnusedExpression") return true;
+      return diagnostic.range.start.line + 1 !== lineCount;
     });
   };
 
@@ -283,8 +280,6 @@
     });
     return () => dispose?.();
   });
-
-  export const getModel = () => file;
 </script>
 
 <div style:width="100%" style:height="100%" bind:this={container}></div>
