@@ -56,6 +56,7 @@
       else break;
     }
     return diagnostics.filter((diagnostic) => {
+      // TODO: These should likely all be configurable based on path / extension
       if (!diagnostic.code || !diagnostic.code.value) return true;
       if (diagnostic.code.value === "reportUnusedExpression")
         return diagnostic.range.start.line + 1 !== lineCount;
@@ -282,8 +283,6 @@
     });
     return () => dispose?.();
   });
-
-  export const getModel = () => file;
 </script>
 
 <div style:width="100%" style:height="100%" bind:this={container}></div>
