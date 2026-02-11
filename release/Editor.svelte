@@ -56,9 +56,12 @@
       else break;
     }
     return diagnostics.filter((diagnostic) => {
+      // TODO: These should likely all be configurable based on path / extension
       if (!diagnostic.code || !diagnostic.code.value) return true;
-      if (diagnostic.code.value !== "reportUnusedExpression") return true;
-      return diagnostic.range.start.line + 1 !== lineCount;
+      if (diagnostic.code.value === "reportUnusedExpression")
+        return diagnostic.range.start.line + 1 !== lineCount;
+      if (diagnostic.code.value === "reportUndefinedVariable") return false;
+      return true;
     });
   };
 
