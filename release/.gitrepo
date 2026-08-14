@@ -6,7 +6,7 @@
 [subrepo]
 	remote = git@github.com:pmalacho-mit/python-monaco-suede
 	branch = release
-	commit = 96f095a8535af8289d436c05a52d26383bfc5e7b
-	parent = f7772afb2b808d16d373c5bebea40c249d1e3e82
+	commit = f14daeeabbe3419972a21a471e2abb49726f83b9
+	parent = 8651051f8af789a8b3ccdba0ab86c2867794df59
 	method = merge
 	cmdver = 0.4.9
