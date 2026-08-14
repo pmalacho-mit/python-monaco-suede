@@ -1,3 +1,5 @@
+export const relative = (path: string) => path.replace(/^\/+/, "");
+
 export const join = (...parts: string[]) =>
   parts
     .map((part, index, { length }) =>
@@ -10,13 +12,24 @@ export const join = (...parts: string[]) =>
     .filter(Boolean)
     .join("/");
 
+export const debounce = <T extends unknown[]>(
+  milliseconds: number,
+  run: (...args: T) => void,
+) => {
+  let timer: ReturnType<typeof setTimeout> | undefined;
+  return (...args: T) => {
+    clearTimeout(timer);
+    timer = setTimeout(() => run(...args), milliseconds);
+  };
+};
+
 export const singletonify = <T extends Record<string, () => any>>(
   getters: T,
 ): { [K in keyof T]: ReturnType<T[K]> } => {
   const instances = new Map<string, ReturnType<T[keyof T]>>();
   let self: { [K in keyof T]: ReturnType<T[K]> };
   self = new Proxy<typeof self>({} as typeof self, {
-    get(target, key: string) {
+    get(_, key: string) {
       if (!instances.has(key)) instances.set(key, getters[key]());
       return instances.get(key);
     },

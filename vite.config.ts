@@ -1,11 +1,16 @@
 import { defineConfig } from "vitest/config";
 import tailwindcss from "@tailwindcss/vite";
 import { sveltekit } from "@sveltejs/kit/vite";
+import { fileURLToPath } from "node:url";
 import { applyConfig } from "./release/config/vite";
+
+const projectRoot = fileURLToPath(new URL(".", import.meta.url));
 
 export default applyConfig(
   defineConfig({
     plugins: [tailwindcss(), sveltekit()],
+
+    server: { fs: { allow: [projectRoot] } },
 
     test: {
       expect: { requireAssertions: true },
