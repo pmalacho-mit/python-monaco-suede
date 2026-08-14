@@ -7,6 +7,8 @@ import { suederoot } from "./dirname";
 import { resolve } from "node:path";
 import { existsSync } from "node:fs";
 
+const SERVER_WORKER = "browser-basedpyright/dist/pyright.worker.js";
+
 /**
  * @typedef {object} ApplyOptions
  * @property {string} [base] Base URL to embed into PYTHON_MONACO_BASE
@@ -24,6 +26,9 @@ export const applyConfig = (current, options = {}) => {
   current.server.fs ??= {};
   current.server.fs.allow ??= [];
   current.server.fs.allow.push(suederoot);
+  current.worker ??= {};
+  // Monaco's workers are loaded as modules, which rollup cannot code-split as iife.
+  current.worker.format ??= "es";
   current.define ??= {};
   current.define["PYTHON_MONACO_BASE"] = options?.base ?? current.base ?? `"/"`;
   current.plugins ??= [];
@@ -31,28 +36,13 @@ export const applyConfig = (current, options = {}) => {
   const node_modules = findNearestNodeModules(suederoot);
   if (!node_modules) throw new Error("Could not find node_modules directory");
 
-  const pyright = resolve(
-    node_modules,
-    "@typefox/pyright-browser/dist/pyright.worker.js",
-  );
+  const server = resolve(node_modules, SERVER_WORKER);
 
-  if (!existsSync(pyright)) throw new Error("Could not find pyright.worker.js");
-
-  const typeshed = resolve(
-    suederoot,
-    "assets/stdlib-source-with-typeshed-pyi.zip",
-  );
-
-  if (!existsSync(typeshed))
-    throw new Error("Could not find stdlib-source-with-typeshed-pyi.zip asset");
+  if (!existsSync(server))
+    throw new Error(`Could not find ${SERVER_WORKER}`);
 
   current.plugins.push(
-    viteStaticCopy({
-      targets: [
-        { src: pyright, dest: "./" },
-        { src: typeshed, dest: "./" },
-      ],
-    }),
+    viteStaticCopy({ targets: [{ src: server, dest: "./" }] }),
   );
   current.optimizeDeps ??= {};
   current.optimizeDeps.esbuildOptions ??= {};
