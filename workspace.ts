@@ -48,9 +48,11 @@ export const workspace = singletonify({
  * imports — and nothing else.
  */
 export const prepare = async (source: string, fallback: string) => {
-  const { files, imports } = workspace;
+  const { files, imports, client } = workspace;
   const path = relative(source);
   if (!files.has(path)) files.memory.write(path, fallback);
-  await imports.reach(path);
+  // A file that imports nothing gives the loader no reason to reach for the
+  // language client, and an unopened document is analysed by nobody.
+  await Promise.all([client, imports.reach(path)]);
   return { uri: uri(path).toString(), text: await files.read(path) };
 };

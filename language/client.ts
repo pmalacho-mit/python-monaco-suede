@@ -11,6 +11,7 @@ import {
   type ProvideDiagnosticSignature,
 } from "vscode-languageclient";
 import type { CancellationToken, TextDocument, Uri } from "vscode";
+import type { Message } from "vscode-languageserver-protocol";
 import * as monaco from "monaco-editor";
 import { newServerWorker } from "../workers";
 import { intercept, type MessageInterceptor } from "./transport";
@@ -71,6 +72,34 @@ const pulled =
     return { ...report, items: filtering.filters.apply(report.items, within) };
   };
 
+const INITIALIZE = "initialize";
+
+/**
+ * The client only pulls diagnostics for documents VS Code reports as visible,
+ * and visibility comes from its tab model — which a standalone Monaco
+ * embedding has none of, so every pulled report is discarded. Not advertising
+ * the capability makes the server publish instead, along a path that has no
+ * such notion of visibility.
+ */
+const preferPublishedDiagnostics = (message: Message) => {
+  const request = message as Message & { method?: string; params?: any };
+  if (request.method !== INITIALIZE) return message;
+  const { diagnostic: _pull, ...textDocument } =
+    request.params?.capabilities?.textDocument ?? {};
+  return {
+    ...request,
+    params: {
+      ...request.params,
+      capabilities: { ...request.params.capabilities, textDocument },
+    },
+  };
+};
+
+const published = (interceptor: MessageInterceptor): MessageInterceptor => ({
+  incoming: interceptor.incoming,
+  outgoing: (message) => interceptor.outgoing(preferPublishedDiagnostics(message)),
+});
+
 export type LanguageClientOptions = {
   workspaceUri: monaco.Uri;
   settings: LanguageSettings;
@@ -93,7 +122,7 @@ export const createLanguageClient = async ({
       reader: new BrowserMessageReader(worker),
       writer: new BrowserMessageWriter(worker),
     },
-    interceptor,
+    published(interceptor),
   );
 
   const host = new MonacoEditorLanguageClientWrapper();
