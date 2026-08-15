@@ -107,18 +107,29 @@
     notebook.add("value + 1");
     set(new Pocket(notebook));
 
-    const [, second] = notebook.cells;
-    await delay({ seconds: 8 });
-
+    const [first, second] = notebook.cells;
+    await workspace.client;
     const monaco = await import("monaco-editor");
-    const messages = monaco.editor
-      .getModelMarkers({ resource: uri(second.path) })
-      .map((marker) => marker.message);
+    const reported = (cell: EditableFile) =>
+      monaco.editor
+        .getModelMarkers({ resource: uri(cell.path) })
+        .map((marker) => marker.message);
 
-    note(`markers: ${rendered(messages)}`);
-    expect(messages.some((message) => message.includes("not an int"))).toBe(
-      false,
+    const onFirst = await askUntilAnswered(async () => {
+      const messages = reported(first);
+      return messages.length > 0 ? messages : undefined;
+    });
+
+    note(`cell 1: ${rendered(onFirst)}`);
+    note(`cell 2: ${rendered(reported(second))}`);
+
+    // Without this the assertion below would hold for a notebook nobody analysed.
+    expect(onFirst?.some((message: string) => message.includes("not an int"))).toBe(
+      true,
     );
+    expect(
+      reported(second).some((message) => message.includes("not an int")),
+    ).toBe(false);
   }}
 >
   {#snippet vest(pocket: Pocket)}

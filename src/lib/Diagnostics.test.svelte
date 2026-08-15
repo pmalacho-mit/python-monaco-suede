@@ -2,7 +2,7 @@
   import { Sweater } from "../../sweater-vest-suede";
   import { Editor, DiagnosticFilter } from "../../release/index";
   import type { EditableFile } from "../../release/models.svelte";
-  import { uri } from "../../release/workspace";
+  import { uri, workspace } from "../../release/workspace";
 
   class Pocket {
     file = $state<EditableFile>()!;
@@ -44,6 +44,7 @@ const MISTAKE = "def broken(:\n";
     const file = fileIn("diagnostics-reported");
     set(new Pocket(file));
 
+    await workspace.client;
     const markers = await untilReported(file);
     note(`markers: ${JSON.stringify(markers.map((each) => each.message))}`);
 
@@ -69,6 +70,7 @@ const MISTAKE = "def broken(:\n";
     const file = fileIn("diagnostics-filtered");
     set(new Pocket(file));
 
+    await workspace.client;
     await delay({ seconds: 8 });
     const markers = await markersOn(file);
     note(`markers: ${JSON.stringify(markers.map((each) => each.message))}`);
