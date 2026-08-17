@@ -2,7 +2,8 @@
   import { Sweater } from "../../../sweater-vest-suede";
   import { FileProvider } from "../../../release/filesystem/provider";
   import {
-    WebKernel,
+    asFilesystem,
+    asProvider,
     type KernelFilesystem,
     type SyncFileProvider,
   } from "../../../release/kernel/filesystem";
@@ -59,7 +60,7 @@
   name="reads the kernel's filesystem as a provider the editor can mount"
   body={async ({ set, expect }) => {
     set(new Pocket());
-    const provider = WebKernel.provider(kernelFilesystem());
+    const provider = asProvider(kernelFilesystem());
 
     expect([...(await provider.paths())].sort()).toMatchObject([
       "main.py",
@@ -79,7 +80,7 @@
   body={async ({ set, expect }) => {
     set(new Pocket());
     const filesystem = kernelFilesystem();
-    const provider = WebKernel.provider(filesystem);
+    const provider = asProvider(filesystem);
 
     await provider.write?.("main.py", "print('edited')");
 
@@ -93,7 +94,7 @@
   name="mounts a provider as the synchronous filesystem the kernel expects"
   body={async ({ set, expect }) => {
     set(new Pocket());
-    const filesystem = WebKernel.filesystem(syncProvider());
+    const filesystem = asFilesystem(syncProvider());
 
     expect(filesystem.get("shapes/circle.py")).toBe(
       contents["shapes/circle.py"],
@@ -119,7 +120,7 @@
     set(new Pocket());
     const memory = new FileProvider.Memory();
     memory.write("main.py", "x = 1");
-    const filesystem = WebKernel.filesystem({
+    const filesystem = asFilesystem({
       paths: memory.paths,
       read: memory.read,
       write: memory.write,
@@ -143,8 +144,8 @@
   name="survives a round trip in either direction"
   body={async ({ set, expect }) => {
     set(new Pocket());
-    const provider = WebKernel.provider(
-      WebKernel.filesystem(syncProvider()),
+    const provider = asProvider(
+      asFilesystem(syncProvider()),
     );
 
     expect([...(await provider.paths())].sort()).toMatchObject(

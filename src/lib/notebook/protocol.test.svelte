@@ -1,6 +1,11 @@
 <script lang="ts">
   import { Sweater } from "../../../sweater-vest-suede";
-  import { Chain, type Cell } from "../../../release/notebook/chain";
+  import {
+    chainedDocument,
+    originOf,
+    preludeOffset,
+    type Cell,
+  } from "../../../release/notebook/chain";
   import { ChainedTransform, type ChainedDocuments } from "../../../release/notebook/protocol";
   import { OpenDocuments } from "../../../release/language/documents";
 
@@ -13,11 +18,11 @@
   const notACell = "file:///workspace/main.py";
 
   const documents: ChainedDocuments = {
-    offset: (uri) => (uri === second ? Chain.offset([first]) : undefined),
+    offset: (uri) => (uri === second ? preludeOffset([first]) : undefined),
     document: (uri) =>
-      uri === second ? Chain.document([first], "shout(greeting)") : undefined,
+      uri === second ? chainedDocument([first], "shout(greeting)") : undefined,
     origin: (uri, line) =>
-      uri === second ? Chain.origin([first], line) : undefined,
+      uri === second ? originOf([first], line) : undefined,
   };
 
   const transform = () => new ChainedTransform(documents, new OpenDocuments());

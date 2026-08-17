@@ -16,7 +16,7 @@ import * as monaco from "monaco-editor";
 import { newServerWorker } from "../workers";
 import { intercept, type MessageInterceptor } from "./transport";
 import { LanguageSettings } from "./settings";
-import { Pyright } from "./pyright";
+import { startPyright } from "./pyright";
 import { DiagnosticFilters, type Diagnostic } from "./diagnostics";
 
 const LANGUAGE_ID = "python";
@@ -115,7 +115,7 @@ export const createLanguageClient = async ({
   diagnostics,
   toPath,
 }: LanguageClientOptions) => {
-  const worker = Pyright.start(newServerWorker);
+  const worker = startPyright(newServerWorker);
 
   const messageTransports = intercept(
     {

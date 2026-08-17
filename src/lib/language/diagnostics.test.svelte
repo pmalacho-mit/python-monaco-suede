@@ -1,9 +1,9 @@
 <script lang="ts">
   import { Sweater } from "../../../sweater-vest-suede";
   import {
-    DiagnosticFilter,
     DiagnosticFilters,
     defaultFilters,
+    undefinedNames,
     type Diagnostic,
   } from "../../../release/language/diagnostics";
 
@@ -151,7 +151,7 @@
     expect(filters.apply([at(0, "reportUndefinedVariable")], cell)).toHaveLength(
       0,
     );
-    filters.unregister(DiagnosticFilter.undefinedNames);
+    filters.unregister(undefinedNames);
     expect(filters.apply([at(0, "reportUndefinedVariable")], cell)).toHaveLength(
       1,
     );

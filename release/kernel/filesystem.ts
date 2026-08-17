@@ -93,37 +93,33 @@ class PathIndex {
 }
 
 /**
- * One filesystem, read by both the editor and the kernel that will run the
- * code — so a file is never held in two places just to be understood in one.
+ * The editor reading the filesystem the kernel mounts, so a file is never held
+ * in two places just to be understood in one.
  */
-export const WebKernel = {
-  /** The editor reading the filesystem the kernel mounts. */
-  provider: (filesystem: KernelFilesystem): FileProvider => ({
-    paths: () => [...descend(filesystem, "")],
-    read: (path) => {
-      const value = filesystem.get(path);
-      if (typeof value !== "string")
-        throw new Error(`No file to read at ${path}`);
-      return value;
-    },
-    ...(filesystem.put && {
-      write: (path: string, text: string) => filesystem.put?.(path, text),
-    }),
-  }),
-
-  /** The filesystem the kernel mounts, from a provider the editor reads. */
-  filesystem: (provider: SyncFileProvider): KernelFilesystem => {
-    const index = new PathIndex(provider);
-    return {
-      get: (path) => {
-        if (index.holds(path)) return provider.read(path);
-        return index.contains(path) ? DIRECTORY : undefined;
-      },
-      listDirectory: (path) => index.childrenOf(path),
-      ...(provider.write && {
-        put: (path: string, value: string | null) =>
-          value === null ? undefined : provider.write?.(path, value),
-      }),
-    };
+export const asProvider = (filesystem: KernelFilesystem): FileProvider => ({
+  paths: () => [...descend(filesystem, "")],
+  read: (path) => {
+    const value = filesystem.get(path);
+    if (typeof value !== "string") throw new Error(`No file to read at ${path}`);
+    return value;
   },
+  ...(filesystem.put && {
+    write: (path: string, text: string) => filesystem.put?.(path, text),
+  }),
+});
+
+/** The filesystem the kernel mounts, from a provider the editor reads. */
+export const asFilesystem = (provider: SyncFileProvider): KernelFilesystem => {
+  const index = new PathIndex(provider);
+  return {
+    get: (path) => {
+      if (index.holds(path)) return provider.read(path);
+      return index.contains(path) ? DIRECTORY : undefined;
+    },
+    listDirectory: (path) => index.childrenOf(path),
+    ...(provider.write && {
+      put: (path: string, value: string | null) =>
+        value === null ? undefined : provider.write?.(path, value),
+    }),
+  };
 };

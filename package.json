@@ -4,7 +4,7 @@
   "version": "0.0.1",
   "type": "module",
   "scripts": {
-    "dev": "vite dev --host 0.0.0.0",
+    "dev": "npm run dev:stop --silent && vite dev --host 0.0.0.0",
     "build": "./sweater-vest-suede/templates/sveltekit/with-exclude-tests-routes-from-build.sh vite build",
     "preview": "vite preview",
     "prepare": "svelte-kit sync || echo ''",
@@ -12,7 +12,8 @@
     "check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch",
     "test:unit": "vitest",
     "test": "npm run test:unit -- --run",
-    "report": "./sweater-vest-suede/report.sh"
+    "report": "./sweater-vest-suede/report.sh",
+    "dev:stop": "pkill -f \"$PWD/node_modules/.bin/[v]ite\" || true"
   },
   "dependencies": {
     "@codingame/esbuild-import-meta-url-plugin": "^1.0.3",
