@@ -4,7 +4,7 @@
 ; git-subrepo command. See https://github.com/ingydotnet/git-subrepo#readme
 ;
 [subrepo]
-	remote = git@github.com:pmalacho-mit/python-monaco-suede
+	remote = https://github.com/pmalacho-mit/python-monaco-suede
 	branch = release
 	commit = f14daeeabbe3419972a21a471e2abb49726f83b9
 	parent = 8651051f8af789a8b3ccdba0ab86c2867794df59
