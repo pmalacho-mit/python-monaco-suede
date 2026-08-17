@@ -1,8 +1,8 @@
 import { FileProvider } from "../filesystem/provider";
 import { join } from "../utils";
 import { DID_OPEN, OpenDocuments } from "./documents";
-import { Imports } from "./imports";
-import { Pyright } from "./pyright";
+import { candidatePaths, scanImports, type ImportReference } from "./imports";
+import { createFile, deleteFile } from "./pyright";
 
 type Notifier = {
   sendNotification: (method: string, params: unknown) => Promise<void>;
@@ -93,7 +93,7 @@ export class DemandLoader {
     const uri = this.toUri(path).toString();
     const client = await this.client();
     this.delivered.set(uri, path);
-    await Pyright.createFile(client, uri);
+    await createFile(client, uri);
     await client.sendNotification(DID_OPEN, {
       textDocument: { uri, languageId: "python", version: 0, text },
     });
@@ -101,16 +101,13 @@ export class DemandLoader {
 
   private resolveAll(importer: string, text: string) {
     const exists = (candidate: string) => this.files.has(candidate);
-    return Imports.scan(text)
+    return scanImports(text)
       .map((reference) => this.underAnyRoot(reference, importer).find(exists))
       .filter((resolved): resolved is string => resolved !== undefined);
   }
 
-  private underAnyRoot(
-    reference: Parameters<typeof Imports.candidates>[0],
-    importer: string,
-  ) {
-    const candidates = Imports.candidates(reference, importer);
+  private underAnyRoot(reference: ImportReference, importer: string) {
+    const candidates = candidatePaths(reference, importer);
     return this.roots.flatMap((root) =>
       candidates.map((candidate) => join(root, candidate)),
     );
@@ -138,7 +135,7 @@ export class DemandLoader {
   }
 
   private async forget(uri: string) {
-    await Pyright.deleteFile(await this.client(), uri);
+    await deleteFile(await this.client(), uri);
   }
 
   private reconsiderUnresolvedImports() {

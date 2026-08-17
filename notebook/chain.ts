@@ -25,8 +25,9 @@ const cellContaining = (preceding: Cell[], line: number): Origin | undefined => 
  * cell, which is how a name bound in one cell becomes visible in the next.
  * Everything the prefix shifts is expressed here as line arithmetic.
  */
-export const Chain = {
-  document: (preceding: Cell[], text: string) => preludeOf(preceding) + text,
-  offset: offsetOf,
-  origin: cellContaining,
-};
+export const chainedDocument = (preceding: Cell[], text: string) =>
+  preludeOf(preceding) + text;
+
+export const preludeOffset = offsetOf;
+
+export const originOf = cellContaining;

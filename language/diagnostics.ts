@@ -61,27 +61,31 @@ const lastMeaningfulLine = (lines: string[]) => {
  * because a python document that is really one cell of a notebook reports
  * things a whole-file checker would be right to complain about.
  */
-export const DiagnosticFilter = {
-  /** A bare trailing expression is how a cell or a script names its result. */
-  trailingExpression: {
-    code: "reportUnusedExpression",
-    when: ({ diagnostic, lines }) =>
-      diagnostic.range.start.line + 1 === lastMeaningfulLine(lines),
-  },
+/** A bare trailing expression is how a cell or a script names its result. */
+export const trailingExpression: DiagnosticFilter = {
+  code: "reportUnusedExpression",
+  when: ({ diagnostic, lines }) =>
+    diagnostic.range.start.line + 1 === lastMeaningfulLine(lines),
+};
 
-  /** Names a cell inherits from a kernel session the checker cannot see. */
-  undefinedNames: { code: "reportUndefinedVariable" },
+/** Names a cell inherits from a kernel session the checker cannot see. */
+export const undefinedNames: DiagnosticFilter = {
+  code: "reportUndefinedVariable",
+};
 
-  /** Imports that only resolve once a package is installed at runtime. */
-  missingImports: { code: "reportMissingImports" },
+/** Imports that only resolve once a package is installed at runtime. */
+export const missingImports: DiagnosticFilter = {
+  code: "reportMissingImports",
+};
 
-  /** Imports whose package ships no type information. */
-  missingStubs: { code: "reportMissingModuleSource" },
-} satisfies Record<string, DiagnosticFilter>;
+/** Imports whose package ships no type information. */
+export const missingStubs: DiagnosticFilter = {
+  code: "reportMissingModuleSource",
+};
 
 export const defaultFilters: DiagnosticFilter[] = [
-  DiagnosticFilter.trailingExpression,
-  DiagnosticFilter.undefinedNames,
+  trailingExpression,
+  undefinedNames,
 ];
 
 export class DiagnosticFilters {

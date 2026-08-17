@@ -64,23 +64,24 @@ const extensions = (base: string[]) =>
         `${base.join("/")}/__init__.py`,
       ];
 
-export const Imports = {
-  scan: (text: string): ImportReference[] =>
-    text.split("\n").map(withoutComment).flatMap(referencesIn),
+export const scanImports = (text: string): ImportReference[] =>
+  text.split("\n").map(withoutComment).flatMap(referencesIn);
 
-  /**
-   * Every path a reference could denote, most specific first. Submodule forms
-   * are included because `from pkg import mod` is indistinguishable from
-   * `from pkg import name` without reading `pkg` itself.
-   */
-  candidates: (reference: ImportReference, importer: string): string[] => {
-    const root =
-      reference.ascend === 0
-        ? reference.parts
-        : [...ascendFrom(importer, reference.ascend), ...reference.parts];
-    const submodules = reference.names.flatMap((name) =>
-      extensions([...root, name]),
-    );
-    return [...extensions(root), ...submodules];
-  },
+/**
+ * Every path a reference could denote, most specific first. Submodule forms
+ * are included because `from pkg import mod` is indistinguishable from
+ * `from pkg import name` without reading `pkg` itself.
+ */
+export const candidatePaths = (
+  reference: ImportReference,
+  importer: string,
+): string[] => {
+  const root =
+    reference.ascend === 0
+      ? reference.parts
+      : [...ascendFrom(importer, reference.ascend), ...reference.parts];
+  const submodules = reference.names.flatMap((name) =>
+    extensions([...root, name]),
+  );
+  return [...extensions(root), ...submodules];
 };

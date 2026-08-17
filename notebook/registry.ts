@@ -1,5 +1,10 @@
 import type { EditableFile } from "../models.svelte";
-import { Chain, type Cell } from "./chain";
+import {
+  chainedDocument,
+  originOf,
+  preludeOffset,
+  type Cell,
+} from "./chain";
 import type { ChainedDocuments } from "./protocol";
 import type { Notebook } from "./models.svelte";
 
@@ -29,13 +34,13 @@ export class Notebooks {
   }
 
   documents: ChainedDocuments = {
-    offset: (uri) => this.withPreceding(uri, Chain.offset),
+    offset: (uri) => this.withPreceding(uri, preludeOffset),
     document: (uri) =>
       this.withPlacement(uri, ({ notebook, cell }) =>
-        Chain.document(this.preceding(notebook, cell), cell.source),
+        chainedDocument(this.preceding(notebook, cell), cell.source),
       ),
     origin: (uri, line) =>
-      this.withPreceding(uri, (preceding) => Chain.origin(preceding, line)),
+      this.withPreceding(uri, (preceding) => originOf(preceding, line)),
   };
 
   /**

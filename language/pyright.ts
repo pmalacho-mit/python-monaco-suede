@@ -25,22 +25,20 @@ const relayChildWorkers = (server: Worker, newWorker: () => Worker) =>
     );
   });
 
+export const startPyright = (newWorker: () => Worker) => {
+  const server = newWorker();
+  relayChildWorkers(server, newWorker);
+  server.postMessage({ type: "browser/boot", mode: "foreground" });
+  return server;
+};
+
 /**
  * The language server keeps its own synchronous, in-memory filesystem inside
- * the worker. `createFile` only makes the path exist — content reaches the
- * server as an open document.
+ * the worker. This only makes the path exist — content reaches the server as
+ * an open document.
  */
-export const Pyright = {
-  start: (newWorker: () => Worker) => {
-    const server = newWorker();
-    relayChildWorkers(server, newWorker);
-    server.postMessage({ type: "browser/boot", mode: "foreground" });
-    return server;
-  },
+export const createFile = (client: Notifier, uri: string) =>
+  client.sendNotification("pyright/createFile", { uri });
 
-  createFile: (client: Notifier, uri: string) =>
-    client.sendNotification("pyright/createFile", { uri }),
-
-  deleteFile: (client: Notifier, uri: string) =>
-    client.sendNotification("pyright/deleteFile", { uri }),
-};
+export const deleteFile = (client: Notifier, uri: string) =>
+  client.sendNotification("pyright/deleteFile", { uri });

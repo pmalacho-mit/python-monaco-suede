@@ -4,14 +4,31 @@ import { EditableFile } from "./models.svelte";
 import { Notebook as NotebookModel } from "./notebook/models.svelte";
 import type { PythonAnalysis } from "./language/settings";
 import { FileProvider } from "./filesystem/provider";
-import type { DiagnosticFilter } from "./language/diagnostics";
+import type { DiagnosticFilter as Filter } from "./language/diagnostics";
+import {
+  missingImports,
+  missingStubs,
+  trailingExpression,
+  undefinedNames,
+} from "./language/diagnostics";
+import { asFilesystem, asProvider } from "./kernel/filesystem";
 import { uri, workspace } from "./workspace";
 
 export type { FileProvider } from "./filesystem/provider";
 export type { PythonAnalysis } from "./language/settings";
 export type { DiagnosticContext } from "./language/diagnostics";
-/** Merges the filter type with the filters worth having by name. */
-export { DiagnosticFilter } from "./language/diagnostics";
+
+/**
+ * The filters worth having, by name. Declared alongside the type of the same
+ * name so that one import carries both.
+ */
+export type DiagnosticFilter = Filter;
+export const DiagnosticFilter = {
+  trailingExpression,
+  undefinedNames,
+  missingImports,
+  missingStubs,
+};
 export type {
   KernelFilesystem,
   SyncFileProvider,
@@ -60,10 +77,10 @@ export const Editor = {
    * Stops matching diagnostics from being reported. Returns the undo, so a
    * filter that belongs to one view can be dropped when that view goes away.
    */
-  registerDiagnosticFilter: (filter: DiagnosticFilter) =>
+  registerDiagnosticFilter: (filter: Filter) =>
     workspace.diagnostics.register(filter),
 
-  unregisterDiagnosticFilter: (filter: DiagnosticFilter) =>
+  unregisterDiagnosticFilter: (filter: Filter) =>
     workspace.diagnostics.unregister(filter),
 
   diagnosticFilters: () => workspace.diagnostics.registered(),
@@ -84,4 +101,8 @@ export namespace Notebook {
   export type Component = NotebookComponent;
 }
 
-export { WebKernel } from "./kernel/filesystem";
+/** One filesystem, read by both the editor and the kernel that runs the code. */
+export const WebKernel = {
+  provider: asProvider,
+  filesystem: asFilesystem,
+};
